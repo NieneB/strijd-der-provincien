@@ -60,7 +60,7 @@ function isloaded() {
 
 // Draw province shapes from geojson
 function provincieMap(){
-    d3.json('./data/provincies2.json', function(error, data){
+    d3.json('https://raw.githubusercontent.com/NieneB/strijd-der-provincien/master/data/provincies2.json', function(error, data){
         if (error) throw error;
         var features = data.features;
         // PROJECTION
