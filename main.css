@@ -26,7 +26,7 @@ a{
 
 h1{
     font-family: 'Headline one';
-    color:#bb2127;
+    color:#5d9840;
     font-size: 4em;
 }
 h4{
@@ -37,10 +37,13 @@ h4{
 text{
     font-family: 'Headline one';
     font-size: 4em;
+    z-index:500000;
+    display: inline-block;
+    height: 10px;
 }
 
 .dark{
-        background-color: #0e232e;
+    background-color: #0e232e;
 }
 
 
@@ -102,6 +105,20 @@ text{
 }
 
 /* ----------------------------------------- */
+.scroll{
+    height: 0px;
+    z-index: 100;
+    margin-left: auto;
+    margin-right: auto;
+    display: hidden;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+    visibility: hidden;
+    color: #fff;
+}
+/* ----------------------------------------- */
+
 
 #graph{
     width: 96%;
