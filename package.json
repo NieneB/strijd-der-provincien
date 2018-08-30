@@ -11,6 +11,16 @@
   "dependencies": {
     "d3": "^4.13.0",
     "scrollmagic": "^2.0.5",
+    "waypoints": "^4.0.1",
     "xmlhttprequest": "^1.8.0"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NieneB/strijd-der-provincien.git"
+  },
+  "bugs": {
+    "url": "https://github.com/NieneB/strijd-der-provincien/issues"
+  },
+  "homepage": "https://github.com/NieneB/strijd-der-provincien#readme"
 }

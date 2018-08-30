@@ -13,9 +13,17 @@
             <img src="img/TheGreenLand-logo400.png" height="80px">
         </div>
         <div class="dark" >
-            <svg id="titel" xmlns="http://www.w3.org/2000/svg" height="362" width="737" version="1.1" viewBox="0 0 195.03874 95.901656"><g transform="translate(33.3 -141)">
-                    <g
-                        transform="matrix(.753 0 0 .753 15.9 46.7)" stroke-width="1.33" fill="#fff">
+
+            <div class="tooltiptext">
+                <p>gegevens <a href="https://data.overheid.nl">data.overheid.nl</a> <span> worden opgehaald </span></p>
+            </div>
+            <div class="tooltip" id="tooltip">
+                <div class="loader" id="loader">
+                </div>
+            </div>
+            <svg id="titel" xmlns="http://www.w3.org/2000/svg" height="362" width="737" version="1.1" viewBox="0 0 195.03874 95.901656"><g
+                    transform="translate(33.3 -141)">
+                    <g transform="matrix(.753 0 0 .753 15.9 46.7)" stroke-width="1.33" fill="#fff">
                         <path d="m8.92 149q0 3.24-3.14 5.12t-8.87 1.88q-4.96 0-8.46-2.03-3.7-2.17-3.56-5.64 0-0.59 0.0699-1.92 0.0699-0.774 0.769-0.774t3.91-0.0739q3.28-0.0737 3.98-0.0737 0.699 0 0.699 0.958v1.81q0 2.65 2.73 2.65 2.17 0 2.31-1.81l0.14-2.06q0.0699-0.921-3.63-2.84-6.22-3.24-6.85-3.65-3.7-2.29-3.7-4.17v-3.13q0-3.35 3-5.34 3.21-2.17 9.36-2.25 5.03-0.0369 8.04 1.84 2.8 1.77 2.8 4.68v3.65q0 0.553-0.769 0.59-2.03 0.111-7.62 0-0.908 0-0.908-0.553-0.0699-0.848 0.14-2.95 0.0699-0.774-0.559-1.51-0.559-0.774-1.54-0.774-2.73 0-2.73 2.43v1.92q0 1.14 3.7 3.24 3.49 1.95 6.99 3.91 3.7 2.43 3.7 4.31z"
                         />
                         <path d="m38.6 130q0 0.516-1.19 0.516-0.489 0-2.1-0.0369-1.54 0-2.52 0-1.47 0-1.47 0.553l0.14 23.8q0 0.59-0.769 0.627-2.52 0.184-7.97-0.0369-0.908-0.0369-0.908-0.627l-0.0699-23.8q0-0.516-0.839-0.516-5.17 0-5.17 0-1.12-0.0369-1.12-0.516 0 0.405-0.14-1.51-0.14-1.25 0.14-1.95 0.28-0.958 1.26-0.958 8.66-0.0369 21.6 0 0.978 0 1.05 0.663 0.14 2.29 0.0699 3.8z"
@@ -60,35 +68,45 @@
                             fill-rule="evenodd" />
                     </g>
                 </g></svg>
-            <div class="tooltiptext">
-                <p>gegevens <a href="https://data.overheid.nl">data.overheid.nl</a> <span> worden opgehaald </span></p>
-            </div>
-            <div class="tooltip" id="tooltip">
-                <div class="loader" id="loader">
-                </div>
-            </div>
         </div>
     </div>
-    <div id="graph" class="dark" ></div>
     <div id="sections">
+            <div id="graph" class="dark"></div>
+
         <div class="row" id="content_1">
+            <h4>datasets gepubliceerd door alle provincies </br> op <a href="https://data.overheid.nl">data.overheid.nl</a></h4>
             <div class="item">
                 <h1 id="totaal" style="color:#5d9840;"></h1>
-                <h4>datasets gepubliceerd door provincies</h4>
+                <h4>totaal </h4>
             </div>
             <div class="item">
                 <h1 id="geo" style="color:#517fa7;"></h1>
-                <h4>geo data sets van <a href=https:nationaalgeoregister.nl>nationaal geo register</a></h4>
+                <h4>geo datasets  </br> van <a href=https:nationaalgeoregister.nl>nationaal geo register</a></h4>
             </div>
             <div class="item">
                 <h1 id="nongeo"></h1>
                 <h4>niet geo datasets</h4>
             </div>
         </div>
+        
+
         <div class="row dark" id="content_2">
+            <h1>1.</h1>
             <h4> Meest Recente Dataset: </h4>
-            <h1 style="color:#5d9840;" id="nieuwstedatum"></h1>
-            <h2 id="nieuwsteset"></h2>
+            <h1 style="color:#5d9840;" id="nieuwstedatum1"></h1>
+            <h2 id="nieuwsteset1"></h2>
+        </div>
+        <div class="row dark" id="content_2_2">
+            <h1>2.</h1>
+            <h4> Meest Recente Dataset: </h4>
+            <h1 style="color:#5d9840;" id="nieuwstedatum2"></h1>
+            <h2 id="nieuwsteset2"></h2>
+        </div>
+        <div class="row dark" id="content_2_3">
+            <h1>3.</h1>
+            <h4> Meest Recente Dataset: </h4>
+            <h1 style="color:#5d9840;" id="nieuwstedatum3"></h1>
+            <h2 id="nieuwsteset3"></h2>
         </div>
         <div class="row"  id="content_3">
             <h4>Totaal per provincie</h4>
