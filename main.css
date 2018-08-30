@@ -6,14 +6,14 @@ html, body {
   font-family: monospace;
   height: 100%;
   width: 100%;
-  overflow-y: scroll;
+  overflow-y: hidden;
   overflow-x: hidden;
   webkit-overflow-scrolling: auto;
 }
 
 #titel{
-    padding: 8%;
-    padding-bottom: 2%;
+    padding: 2%;
+    /* padding-bottom: 2%; */
 }
 
 p{
@@ -31,6 +31,7 @@ h1{
 }
 h4{
     font-family: monospace;
+    line-height: 1.5;
 }
 
 text{
@@ -45,17 +46,19 @@ text{
 
 #introduction{
     width: 100%;
-    /* height: 110vh; */
+    height: 100vh;
     margin-left: auto;
     margin-right: auto;
     /* margin-bottom: 10px; */
     /* padding:  2% ; */
     text-align: center;
     /* position: relative; */
+    background-color: #0e232e;
 }
 
 #logo{
     padding:2%;
+    background-color: #ffffff;
 }
 
 
@@ -68,9 +71,9 @@ text{
     margin-left: auto;
     margin-right: auto;
     display: table;
-    margin-top: 50px;
+    margin-top: 10px;
     margin-bottom: 10px;
-    padding-bottom:40px;
+    /* padding-bottom:40px; */
 
 }
 /*turning loader*/
@@ -79,8 +82,8 @@ text{
     border-top: 15px solid #bb2127; /* Blue */
     border-bottom: 15px solid #bb2127;
     border-radius: 50%;
-    width: 75px;
-    height: 75px;
+    width: 40px;
+    height: 40px;
     animation: spin 2s linear infinite;
     /* box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.8), 0 6px 20px 0 rgba(0, 0, 0, 0.19); */
 }
@@ -101,6 +104,7 @@ text{
 /* ----------------------------------------- */
 
 #graph{
+    width: 96%;
     position: -webkit-sticky;
     position: sticky;
     top: 0;
@@ -113,7 +117,7 @@ text{
 }
 
 #sections > div{
-    width: 100%;
+    width: 96%;
     /* height: 100vh; */
     margin-left: auto;
     margin-right: auto;
