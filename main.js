@@ -7,8 +7,8 @@ var ScrollMagic = require('scrollmagic');
 
 
 // ==================================================// 
-var provincies = ["Noord-Brabant", "Zuid-Holland", "Provincie_Groningen", "Provincie_Utrecht", "Gelderland", "Noord-Holland", "Flevoland", "Drenthe", "Fryslan", "Limburg", "Zeeland", "Overijssel"];
-// var provincies = ["Noord-Brabant", "Zuid-Holland", "Noord-Holland"];
+// var provincies = ["Noord-Brabant", "Zuid-Holland", "Provincie_Groningen", "Provincie_Utrecht", "Gelderland", "Noord-Holland", "Flevoland", "Drenthe", "Fryslan", "Limburg", "Zeeland", "Overijssel"];
+var provincies = ["Noord-Brabant", "Zuid-Holland", "Noord-Holland"];
 var loader = d3.selectAll('#loader');
 var dataset_list = [];
 var count = 0;
@@ -45,13 +45,11 @@ function isloaded() {
             // Enable scrolling
             d3.select('body').style("overflow-y", "scroll");
             // Show scroll trigger
-            // ...........
-            // ..........
-
+            d3.select('#scroll').style("height", "45px").style("visibility", 'visible').style("display", "block");
             // stop timer
             clearInterval(id);
             // remove timer
-            d3.selectAll('#loader').remove()    ;
+            d3.selectAll('#loader').remove();
             // Set retrieval data
             d3.select('.tooltiptext').selectAll('span').remove();
             d3.select('.tooltiptext').select('p').append('p').text("van: " + new Date() )
@@ -93,6 +91,28 @@ function provincieMap(){
             } )
             .attr("stroke", "#0e232e")
             .attr("fill", "#fff")
+            .on("mouseover", function(d){
+                // var coordinates = d3.mouse(this);
+                // var x = coordinates[0];
+                // var y = coordinates[1];
+                // var th = d3.select(this);
+                // console.log(x)
+                d3.select(this).append( 'text')
+                    .attr("class", "halo")
+                    .text(d.properties.statnaam)
+                    // .attr('transform', function (d) {
+                    //     return "translate(" + path.centroid(d) + ")";
+                    // })
+                    .attr("x", 30)
+                    .attr("y", 50)
+                    .style("text-anchor", "middle")
+                    .attr("fill", "black")
+                    .style("color", "#eee000")
+                    .style("font-size","14px");
+            })
+            .on("mouseout", function(d){
+                // d3.select(this).selectAll('text').remove();
+            })
             ;
     });
 };
@@ -130,7 +150,7 @@ function ProvinceDataset(arr, provincie){
         else { console.log("other date notation.. : ", parts) }
 
         // Create main dataset list
-        dataset_list.push({ "provincie": provincie, "theme": element.theme, "theme2": element.theme_displayname, "name": element.name, "titel": element.title, "source": element.source, "value": element.high_value_dataset, "created": mydate, "modified": element.metadata_modified, "request_date": new Date() });
+        dataset_list.push({ "provincie": provincie, "theme": element.theme, "theme2": element.theme_displayname, "name": element.name, "titel": element.title, "source": element.source, "created": new Date(element.metadata_created), "meta_modified": new Date(element.metadata_modified), "modified": new Date(element.modified), "request_date": new Date() });
     }
 };
 
@@ -144,7 +164,7 @@ function setViz(){
         .key(function (d) { return d.source; })
         .entries(dataset_list)
         .sort(function (a, b) {
-            return new Date(b.created - a.created)
+            return new Date(b.created) - new Date(a.created)
         });
     var obj = findObjectByKey(datasetsPerSource, 'key', "ngr");
     var ngrAmount = obj.values.length;
@@ -152,24 +172,30 @@ function setViz(){
     var nonNgrAmount = totaalAmount - ngrAmount;
     d3.select("#nongeo").text(nonNgrAmount);
 
+    var dataset_list_niet_ngr = findObjectByKey(datasetsPerSource, 'key', "dataplatform");
+    console.log(dataset_list_niet_ngr);
+    dataset_list_niet_ngr.values.sort((a, b) => {
+        return new Date(b.created) - new Date(a.created);
+    });
     // CONTENT 2 LATEST DATASETS PUBLISHED
     dataset_list.sort((a, b) => {
         return new Date(b.created) - new Date(a.created);
     });
     d3.select("#nieuwstedatum1").text(dataset_list[0].created.yyyymmdd());
-    d3.select("#nieuwsteset1").text(dataset_list[0].titel);
-    d3.select("#nieuwstedatum2").text(dataset_list[1].created.yyyymmdd());
-    d3.select("#nieuwsteset2").text(dataset_list[1].titel);
+    d3.select("#nieuwsteset1").text(dataset_list[0].titel + '  -  ' + dataset_list[0].provincie);
+    d3.select("#nieuwstedatum2").text(dataset_list_niet_ngr.values[0].created.yyyymmdd());
+    d3.select("#nieuwsteset2").text(dataset_list_niet_ngr.values[0].titel + '  -  ' + dataset_list_niet_ngr.values[0].provincie);
     d3.select("#nieuwstedatum3").text(dataset_list[2].created.yyyymmdd());
-    d3.select("#nieuwsteset3").text(dataset_list[2].titel);
+    d3.select("#nieuwsteset3").text(dataset_list[2].titel + '  -  ' + dataset_list[2].provincie);
 
     // CONTENT 3 TOTAAL PER PROVINCIE
     var datasetsPerProvince = d3.nest()
         .key(function (d) { return d.provincie; })
         .entries(dataset_list)
         .sort(function (a, b) {
-            return new Date(b.created - a.created)
+            return new Date(b.created) - new Date(a.created);
         });
+   
     graphPerProvince = d3.select('#content_3')
         .append('svg')
         .attr("width", width)
@@ -204,11 +230,19 @@ function setViz(){
         });
 
     // CONTENT 4 AANTAL DAGEN SINDS LAATSTE PUB
-    var dagen =  dagenVerschil(datasetsPerProvince);
+    // console.log(datasetsPerProvince);
+
+    var dagen = dagenVerschil(datasetsPerProvince);
+    var max =  Math.max(...dagen.map(function (key) { return key.dagen; }));
+    console.log(dagen);
+    var scaleHeight = d3.scaleLinear()
+        .domain([0,max])
+        .range([0,500])
+
     graph = d3.select('#content_4')
         .append('svg')
         .attr("width", width)
-        .attr("height", 3000);
+        .attr("height", 500);
     graph
         .selectAll('rect')
         .data(dagen)
@@ -218,7 +252,7 @@ function setViz(){
         .attr("y", 0)
         .attr("width", "40px")
         .style("fill", "#fff")
-        .attr("height", function (d) { return d.dagen * 20 + "px"; })
+        .attr("height", function (d) { return scaleHeight(d.dagen) + "px"; })
         .each(function (d) {
             var prov = d3.selectAll('svg').select('#' + d.provincie + '.provincie');
             var trans = prov.attr("transform");
@@ -234,13 +268,32 @@ function setViz(){
                 .attr("x", x - 20)
                 .attr("y", 0)
                 .attr("transform", "translate(" + sp.x + ", 0)")
-        })
-        .append('text')
-        .text(function (d) {
-            return d.dagen
-        })
-        .style("color", "#0e232e")
-        .attr("text-anchor", "top");
+        });
+    // graph.selectAll('rect')
+    //     .append('text')
+    //     .text(function (d) {
+    //         return d.dagen
+    //     })
+    //     .style("color", "#0e232e")
+    //     .attr("x", function(d,i){
+    //        return i * 10
+    //     })
+    //     .attr("y", 5);
+
+    // CONTENT 5 THEMAS TOP 10 Themas. en per provincie wat ze meeste doen. 
+    var datasetsPerThema = d3.nest()
+        .key(function (d) { return d.theme; })
+        .entries(dataset_list)
+        .sort(function (a, b) {
+            return new Date(b.created - a.created)
+        });
+    console.log(datasetsPerThema);
+
+    // CONTENT 6 Publicatie datum over tijd. 
+
+    // ....
+    // ....
+    // ....
 };
 
 function setRest() {
@@ -305,12 +358,14 @@ function findObjectByKey(array, key, value) {
 // dagen verschil met huidige datum
 function dagenVerschil(datasetsPerProvince){
     var dagen = [];
-    for (let i = 0; i < provincies.length; i++) {
-        const provincie = provincies[i];
+    for (let i = 0; i < datasetsPerProvince.length; i++) {
+        var prov = datasetsPerProvince[i];
+        // console.log(prov.key)
+        // console.log(prov.values)
         var today = new Date();
-        var mydate = datasetsPerProvince[i].values[0].created;
-        dagen.push({ "provincie": provincie, "dagen": Math.round((today - mydate) / (1000 * 60 * 60 * 24)) })
-        console.log(provincie, " dagen ", today, mydate, Math.round((today - mydate) / (1000 * 60 * 60 * 24)));
+        var mydate = new Date(prov.values[0].created);
+        dagen.push({ "provincie": prov.key, "dagen": Math.round((today - mydate) / (1000 * 60 * 60 * 24)) })
+        // console.log(provincie, " dagen ", today, mydate, Math.round((today - mydate) / (1000 * 60 * 60 * 24)));
     }
     return dagen;
 };
