@@ -11,6 +11,7 @@ var provincies = ["Noord-Brabant", "Zuid-Holland", "Provincie_Groningen", "Provi
 // var provincies = ["Noord-Brabant", "Zuid-Holland", "Noord-Holland"];
 var loader = d3.selectAll('#loader');
 var dataset_list = [];
+dataset_list_niet_ngr = [];
 var count = 0;
 var width = document.body.clientWidth - (document.body.clientWidth*0.1) ;
 var part = width / 12;
@@ -52,7 +53,7 @@ function isloaded() {
             d3.selectAll('#loader').remove();
             // Set retrieval data
             d3.select('.tooltiptext').selectAll('span').remove();
-            d3.select('.tooltiptext').select('p').append('p').text("van: " + new Date() )
+            d3.select('.tooltiptext').select('#replace').append('span').text("Gegevens opgehaald op: " + new Date() )
             // Do data crunch en visualization
             setViz();
             initScrollMagic();
@@ -172,7 +173,7 @@ function setViz(){
     var nonNgrAmount = totaalAmount - ngrAmount;
     d3.select("#nongeo").text(nonNgrAmount);
 
-    var dataset_list_niet_ngr = findObjectByKey(datasetsPerSource, 'key', "dataplatform");
+    dataset_list_niet_ngr = findObjectByKey(datasetsPerSource, 'key', "dataplatform");
     console.log(dataset_list_niet_ngr);
     dataset_list_niet_ngr.values.sort((a, b) => {
         return new Date(b.created) - new Date(a.created);
@@ -422,7 +423,7 @@ function initScrollMagic() {
         })
         .on("enter ", function (event) {
             // animatie op svg
-            d3.selectAll('svg').select('#' + dataset_list[1].provincie)
+            d3.selectAll('svg').select('#' + dataset_list_niet_ngr.values[0].provincie)
                 .transition()
                 .duration(100)
                 .style("fill", "#5d9840")
