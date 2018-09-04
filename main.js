@@ -7,8 +7,8 @@ var ScrollMagic = require('scrollmagic');
 
 
 // ==================================================// 
-// var provincies = ["Noord-Brabant", "Zuid-Holland", "Provincie_Groningen", "Provincie_Utrecht", "Gelderland", "Noord-Holland", "Flevoland", "Drenthe", "Fryslan", "Limburg", "Zeeland", "Overijssel"];
-var provincies = ["Noord-Brabant", "Zuid-Holland", "Noord-Holland"];
+var provincies = ["Noord-Brabant", "Zuid-Holland", "Provincie_Groningen", "Provincie_Utrecht", "Gelderland", "Noord-Holland", "Flevoland", "Drenthe", "Fryslan", "Limburg", "Zeeland", "Overijssel"];
+// var provincies = ["Noord-Brabant", "Zuid-Holland", "Noord-Holland"];
 var loader = d3.selectAll('#loader');
 var dataset_list = [];
 var count = 0;
