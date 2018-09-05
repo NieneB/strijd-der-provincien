@@ -7,8 +7,8 @@ var ScrollMagic = require('scrollmagic');
 
 
 // ==================================================// 
-var provincies = ["Noord-Brabant", "Zuid-Holland", "Provincie_Groningen", "Provincie_Utrecht", "Gelderland", "Noord-Holland", "Flevoland", "Drenthe", "Fryslan", "Limburg", "Zeeland", "Overijssel"];
-// var provincies = ["Noord-Brabant", "Zuid-Holland", "Noord-Holland"];
+// var provincies = ["Noord-Brabant", "Zuid-Holland", "Provincie_Groningen", "Provincie_Utrecht", "Gelderland", "Noord-Holland", "Flevoland", "Drenthe", "Fryslan", "Limburg", "Zeeland", "Overijssel"];
+var provincies = ["Noord-Brabant", "Zuid-Holland", "Noord-Holland"];
 var loader = d3.selectAll('#loader');
 var dataset_list = [];
 dataset_list_niet_ngr = [];
@@ -19,6 +19,7 @@ var height = 150;
 var provinciesSVG;
 var graphPerProvince;
 var graph;
+var themaGraph;
 var path;
 // ==================================================//
 // start website by requesting data
@@ -81,6 +82,13 @@ function provincieMap(){
             .attr("height", height)
             .attr("width", width);
         // PATH PER PROVINCE
+        var tooltip = d3.select("body")
+            .append("div")
+            .style("position", "absolute")
+            .style("z-index", "10")
+            .style("visibility", "hidden")
+            .style("background", "#000")
+            .text("a simple tooltip");
         provinciesSVG = svg.selectAll('path')
             .data(features)
             .enter()
@@ -91,30 +99,34 @@ function provincieMap(){
                 return d.properties.statnaam;
             } )
             .attr("stroke", "#0e232e")
-            .attr("fill", "#fff")
+            .style("fill", "#ffffff")
             .on("mouseover", function(d){
+                tooltip.text(d); 
+                tooltip.style("visibility", "visible");
                 // var coordinates = d3.mouse(this);
                 // var x = coordinates[0];
                 // var y = coordinates[1];
                 // var th = d3.select(this);
                 // console.log(x)
-                d3.select(this).append( 'text')
+                d3.select(this)
+                    .transition()
+                    .duration(100)
+                    .style("fill", "#eee000");
+                d3.select(this)
+                    .append('svg:title')
                     .attr("class", "halo")
                     .text(d.properties.statnaam)
-                    // .attr('transform', function (d) {
-                    //     return "translate(" + path.centroid(d) + ")";
-                    // })
-                    .attr("x", 30)
-                    .attr("y", 50)
                     .style("text-anchor", "middle")
-                    .attr("fill", "black")
-                    .style("color", "#eee000")
+                    .style("fill", "#000000")
                     .style("font-size","14px");
             })
             .on("mouseout", function(d){
-                // d3.select(this).selectAll('text').remove();
-            })
-            ;
+                d3.select(this)
+                    .transition()
+                    .duration(10)
+                    .style("fill", "#ffffff");
+                tooltip.style("visibility", "hidden");
+            });
     });
 };
 
@@ -174,7 +186,7 @@ function setViz(){
     d3.select("#nongeo").text(nonNgrAmount);
 
     dataset_list_niet_ngr = findObjectByKey(datasetsPerSource, 'key', "dataplatform");
-    console.log(dataset_list_niet_ngr);
+    // console.log(dataset_list_niet_ngr);
     dataset_list_niet_ngr.values.sort((a, b) => {
         return new Date(b.created) - new Date(a.created);
     });
@@ -191,16 +203,18 @@ function setViz(){
 
     // CONTENT 3 TOTAAL PER PROVINCIE
     var datasetsPerProvince = d3.nest()
-        .key(function (d) { return d.provincie; })
+        .key(function(d){ return d.provincie; })
         .entries(dataset_list)
         .sort(function (a, b) {
             return new Date(b.created) - new Date(a.created);
         });
-   
+    console.log(datasetsPerProvince);
+        
     graphPerProvince = d3.select('#content_3')
         .append('svg')
         .attr("width", width)
-        .attr("height", 300);
+        .attr("height", 300)
+        .style("visibility", "hidden");
     graphPerProvince
         .selectAll('text')
         .data(datasetsPerProvince)
@@ -231,24 +245,29 @@ function setViz(){
         });
 
     // CONTENT 4 AANTAL DAGEN SINDS LAATSTE PUB
-    // console.log(datasetsPerProvince);
-
     var dagen = dagenVerschil(datasetsPerProvince);
     var max =  Math.max(...dagen.map(function (key) { return key.dagen; }));
-    console.log(dagen);
     var scaleHeight = d3.scaleLinear()
         .domain([0,max])
-        .range([0,500])
+        .range([20,650])
 
     graph = d3.select('#content_4')
         .append('svg')
         .attr("width", width)
-        .attr("height", 500);
-    graph
-        .selectAll('rect')
+        .attr("height", 650)
+        .style("visibility", "hidden");
+
+    var graph_groups = graph
+        .selectAll('g')
         .data(dagen)
         .enter()
+        .append('g');
+        
+    graph_groups
         .append('rect')
+        .attr("id", function (d) {
+            return d.provincie;
+        })
         .attr("class", "chart")
         .attr("y", 0)
         .attr("width", "40px")
@@ -270,28 +289,166 @@ function setViz(){
                 .attr("y", 0)
                 .attr("transform", "translate(" + sp.x + ", 0)")
         });
-    // graph.selectAll('rect')
-    //     .append('text')
-    //     .text(function (d) {
-    //         return d.dagen
-    //     })
-    //     .style("color", "#0e232e")
-    //     .attr("x", function(d,i){
-    //        return i * 10
-    //     })
-    //     .attr("y", 5);
-
-    // CONTENT 5 THEMAS TOP 10 Themas. en per provincie wat ze meeste doen. 
-    var datasetsPerThema = d3.nest()
-        .key(function (d) { return d.theme; })
-        .entries(dataset_list)
-        .sort(function (a, b) {
-            return new Date(b.created - a.created)
+    graph_groups.append('text')
+        .text(function(d){return d.dagen})
+        .style("color", "#0e232e")
+        .style("font-size", "20px")
+        .each(function (d) {
+            var prov = d3.selectAll('svg').select('#' + d.provincie + '.provincie');
+            var trans = prov.attr("transform");
+            var centroid = path.centroid(prov.datum()),
+                x = centroid[0],
+                y = centroid[1];
+            var node = prov.node();
+            var bbox = node.getBBox();
+            var matrix = node.getTransformToElement(node.nearestViewportElement);
+            var p = node.nearestViewportElement.createSVGPoint();
+            var sp = p.matrixTransform(matrix);
+            d3.select(this)
+                .attr("x", x - 20)
+                .attr("y", 10)
+                .attr("transform", "translate(" + sp.x + 15 + ", 10)")
         });
-    console.log(datasetsPerThema);
+    
+    // CONTENT 5 THEMAS TOP 10 Themas. en per provincie wat ze meeste doen. 
+    var datasetsPerProvincieThema = d3.nest()
+        .key(function (d) { return d.provincie; })
+        .key(function (d) { return d.theme2; })
+        .rollup(function (leaves) { return leaves.length })
+        .entries(dataset_list)
+        .sort(function (a, b) { return d3.descending(a.value, b.value); });
+    // console.log(datasetsPerProvincieThema)
+
+    var datasetsPerThema = d3.nest()
+        .key(function (d) { return d.theme2;})
+        .rollup(function (leaves) { return leaves.length })
+        .entries(dataset_list)
+        .sort(function (a, b) { return d3.descending(a.value, b.value); });
+    // datasetsPerThema.slice(0,3);
+
+    var accent = d3.scaleOrdinal()
+        .domain(d3.values(datasetsPerThema).map(function (d) {
+            return d.key;
+        }))
+        .range(d3.schemeCategory10);
+
+    d3.select("#top1")
+        .text(datasetsPerThema[0].key)
+        .style("color", accent(datasetsPerThema[0].key));
+    d3.select("#top2").text(datasetsPerThema[1].key).style("color", accent(datasetsPerThema[1].key));
+    d3.select("#top3").text(datasetsPerThema[2].key).style("color", accent(datasetsPerThema[2].key));
+
+    d3.select("#top1waarde").text(datasetsPerThema[0].value);
+    d3.select("#top2waarde").text(datasetsPerThema[1].value);
+    d3.select("#top3waarde").text(datasetsPerThema[2].value);
+
+    themaGraph = d3.select('#content_5')
+        .append('svg')
+        .attr("width", width)
+        .attr("height", 650)
+        .style("visibility", "visible");
+
+    var themaGraphGroups = themaGraph
+        .selectAll('g')
+        .data(datasetsPerProvincieThema)
+        .enter()
+        .append('g')
+        .attr("id", function (d) {
+            return d.key;
+        })
+        .attr("y", 50)
+        .attr("x", 0)
+        .each(function (d) {
+            var prov = d3.selectAll('svg').select('#' + d.key + '.provincie');
+            var trans = prov.attr("transform");
+            var centroid = path.centroid(prov.datum()),
+                x = centroid[0],
+                y = centroid[1];
+            var node = prov.node();
+            var bbox = node.getBBox();
+            var matrix = node.getTransformToElement(node.nearestViewportElement);
+            var p = node.nearestViewportElement.createSVGPoint();
+            var sp = p.matrixTransform(matrix);
+            d3.select(this)
+                .attr("x", x)
+                .attr("y", 0)
+                .attr("transform", "translate(" + sp.x + ", 50)")
+        });
+
+    themaGraphGroups
+        .selectAll('circle')
+        .data(function (d) { return d.values.slice(0, 3)})
+        .enter()
+        .append('circle')
+        .attr("id", function (d) {
+            return d.key;
+        })
+        .attr("r", function(d){
+            return d.value
+        })
+        .style("opacity", 0.85)
+        .style("fill", function (d) {
+            return accent(d.key)
+        })
+        .attr("cy", function(d,i){
+            return (i*70)
+        })
+        .each(function (d) {
+            // console.log(this.parentNode.__data__.key)
+            var prov = d3.selectAll('svg').select('#' + this.parentNode.__data__.key + '.provincie');
+            var trans = prov.attr("transform");
+            var centroid = path.centroid(prov.datum()),
+                x = centroid[0],
+                y = centroid[1];
+            var node = prov.node();
+            var bbox = node.getBBox();
+            var matrix = node.getTransformToElement(node.nearestViewportElement);
+            var p = node.nearestViewportElement.createSVGPoint();
+            var sp = p.matrixTransform(matrix);
+            d3.select(this)
+                .attr("x", x)
+                .attr("transform", "translate(" + sp.x + ", 60)")
+        });
+    
+    themaGraphGroups
+        .selectAll('text')
+        .data(function (d) { return d.values.slice(0, 3) })
+        .enter()
+        .append('text')
+        .text(function (d) { return d.value })
+        .style("color", "#0e232e")
+        .style("font-size", "20px")
+        .attr("y", function (d, i) {
+            return (i * 70)
+        })
+        .attr("cy", function (d, i) {
+            return (i * 70)
+        })
+        .each(function (d) {
+            var prov = d3.selectAll('svg').select('#' + this.parentNode.__data__.key + '.provincie');
+            var trans = prov.attr("transform");
+            var centroid = path.centroid(prov.datum()),
+                x = centroid[0],
+                y = centroid[1];
+            var node = prov.node();
+            var bbox = node.getBBox();
+            var matrix = node.getTransformToElement(node.nearestViewportElement);
+            var p = node.nearestViewportElement.createSVGPoint();
+            var sp = p.matrixTransform(matrix);
+            d3.select(this)
+                .attr("x", x -10)
+                .attr("transform", "translate(" + sp.x + ", -10)")
+        });
 
     // CONTENT 6 Publicatie datum over tijd. 
 
+    var datasetsPerTime = d3.nest()
+        .key(function (d) { return d.created; })
+        .entries(dataset_list)
+        .sort(function (a, b) {
+            return new Date(b.created) - new Date(a.created);
+        });
+    // console.log(datasetsPerTime);
     // ....
     // ....
     // ....
@@ -406,7 +563,7 @@ function initScrollMagic() {
         duration: 500 
     })
         .on("progress", function (event) {
-            console.log("Scene progress changed to " + event.progress);
+            // console.log("Scene progress changed to " + event.progress);
         })
         .on("enter ", function (event) {
             d3.selectAll('svg').select('#' + dataset_list[0].provincie)
@@ -436,7 +593,7 @@ function initScrollMagic() {
             duration: 500
         })
         .on("progress", function (event) {
-            console.log("Scene progress changed to " + event.progress);
+            // console.log("Scene progress changed to " + event.progress);
         })
         .on("enter ", function (event) {
             d3.selectAll('svg').select('#' + dataset_list[2].provincie)
@@ -475,6 +632,7 @@ function spreadProvincies(){
     provinciesSVG
         .each(function (d, i) {
             var element = d3.select(this);
+            //distribute horizontaly objects along one line. 
             element
                 .transition()
                 .duration(1000)
@@ -483,30 +641,13 @@ function spreadProvincies(){
                         x = centroid[0],
                         y = centroid[1];
                     return "translate(" + ((-x + (part * i)) + part / 2) + "," + (-y + height / 2) + ")"; 
-                    //distribute horizontaly objects along one line. 
+                // Text 
+            element.append('text')
+
                 })
                 .on("end", function(){
-                    graph.selectAll('rect')
-                        
-                        .each(function (d) {
-                            var prov = d3.selectAll('svg').select('#' + d.provincie + '.provincie');
-                            var trans = prov.attr("transform");
-                            var centroid = path.centroid(prov.datum()),
-                                x = centroid[0],
-                                y = centroid[1];
-                            var node = prov.node();
-                            var bbox = node.getBBox();
-                            var matrix = node.getTransformToElement(node.nearestViewportElement);
-                            var p = node.nearestViewportElement.createSVGPoint();
-                            var sp = p.matrixTransform(matrix);
-                            d3.select(this)
-                                .transition()
-                                .duration(1000)
-                                .attr("x", x - 20)
-                                .attr("y", 0)
-                                .attr("transform", "translate(" + sp.x + ", 0)")
-                        });
                     graphPerProvince.selectAll('text')
+                        .style("visibility", "visible")
                         .each(function (d) {
                             var prov = d3.selectAll('svg').select('#' + d.key + '.provincie');
                             var trans = prov.attr("transform");
@@ -525,6 +666,47 @@ function spreadProvincies(){
                                 .attr("y", 150)
                                 .attr("transform", "translate(" + sp.x + ", 0)");
                         });
+                    graph.selectAll('g')
+                        .style("visibility", "visible")
+                        .each(function (d) {
+                            var prov = d3.selectAll('svg').select('#' + d.provincie + '.provincie');
+                            var trans = prov.attr("transform");
+                            var centroid = path.centroid(prov.datum()),
+                                x = centroid[0],
+                                y = centroid[1];
+                            var node = prov.node();
+                            var bbox = node.getBBox();
+                            var matrix = node.getTransformToElement(node.nearestViewportElement);
+                            var p = node.nearestViewportElement.createSVGPoint();
+                            var sp = p.matrixTransform(matrix);
+                            d3.select(this)
+                                .transition()
+                                .duration(1000)
+                                .attr("x", x - 20)
+                                .attr("y", 0)
+                                .attr("transform", "translate(" + sp.x + ", 0)")
+                        }); 
+                    themaGraph.selectAll('circle, text')
+                            .style("visibility", "visible")
+                            .each(function (d) {
+                                var prov = d3.selectAll('svg').select('#' + this.parentNode.__data__.key + '.provincie');
+                                var trans = prov.attr("transform");
+                                var centroid = path.centroid(prov.datum()),
+                                    x = centroid[0],
+                                    y = centroid[1];
+                                var node = prov.node();
+                                var bbox = node.getBBox();
+                                var matrix = node.getTransformToElement(node.nearestViewportElement);
+                                var p = node.nearestViewportElement.createSVGPoint();
+                                var sp = p.matrixTransform(matrix);
+                                d3.select(this)
+                                    .transition()
+                                    .duration(1000)
+                                    .attr("x", x )
+                                    .attr("cx", x)
+                                    .attr("transform", "translate(" + sp.x + ", 0)")
+                            });
+
                 });
         });
 };
