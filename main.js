@@ -7,8 +7,8 @@ var ScrollMagic = require('scrollmagic');
 
 
 // ==================================================// 
-// var provincies = ["Noord-Brabant", "Zuid-Holland", "Provincie_Groningen", "Provincie_Utrecht", "Gelderland", "Noord-Holland", "Flevoland", "Drenthe", "Fryslan", "Limburg", "Zeeland", "Overijssel"];
-var provincies = ["Noord-Brabant", "Zuid-Holland", "Noord-Holland"];
+var provincies = ["Noord-Brabant", "Zuid-Holland", "Provincie_Groningen", "Provincie_Utrecht", "Gelderland", "Noord-Holland", "Flevoland", "Drenthe", "Fryslan", "Limburg", "Zeeland", "Overijssel"];
+// var provincies = ["Noord-Brabant", "Zuid-Holland"];
 var loader = d3.selectAll('#loader');
 var dataset_list = [];
 dataset_list_niet_ngr = [];
@@ -317,7 +317,7 @@ function setViz(){
         .rollup(function (leaves) { return leaves.length })
         .entries(dataset_list)
         .sort(function (a, b) { return d3.descending(a.value, b.value); });
-    // console.log(datasetsPerProvincieThema)
+    console.log(datasetsPerProvincieThema)
 
     var datasetsPerThema = d3.nest()
         .key(function (d) { return d.theme2;})
@@ -377,7 +377,7 @@ function setViz(){
 
     themaGraphGroups
         .selectAll('circle')
-        .data(function (d) { return d.values.slice(0, 3)})
+        .data(function (d) { return d.values.slice(0, 3).sort(function (a, b) { return d3.descending(a.value, b.value); })})
         .enter()
         .append('circle')
         .attr("id", function (d) {
@@ -409,10 +409,21 @@ function setViz(){
                 .attr("x", x)
                 .attr("transform", "translate(" + sp.x + ", 60)")
         });
-    
+
+    var simulation = d3.forceSimulation(datasetsPerProvincieThema)
+        .force("charge", d3.forceManyBody().strength([-50]))
+        .force("x", d3.forceX())
+        .force("y", d3.forceY())
+        .on("tick", ticked);
+
+    function ticked(e) {
+        themaGraphGroups.attr("cx", function (d) { return d.x; })
+            .attr("cy", function (d) { return d.y; });
+    }
+
     themaGraphGroups
         .selectAll('text')
-        .data(function (d) { return d.values.slice(0, 3) })
+        .data(function (d) { return d.values.slice(0, 3).sort(function (a, b) { return d3.descending(a.value, b.value); }) })
         .enter()
         .append('text')
         .text(function (d) { return d.value })
@@ -439,6 +450,8 @@ function setViz(){
                 .attr("x", x -10)
                 .attr("transform", "translate(" + sp.x + ", -10)")
         });
+
+    
 
     // CONTENT 6 Publicatie datum over tijd. 
 
@@ -566,7 +579,7 @@ function initScrollMagic() {
             // console.log("Scene progress changed to " + event.progress);
         })
         .on("enter ", function (event) {
-            d3.selectAll('svg').select('#' + dataset_list[0].provincie)
+            d3.select("#graph").selectAll('svg').select('#' + dataset_list[0].provincie)
                 .transition()
                 .duration(100)
                 .style("fill", "#5d9840")
@@ -580,34 +593,34 @@ function initScrollMagic() {
         })
         .on("enter ", function (event) {
             // animatie op svg
-            d3.selectAll('svg').select('#' + dataset_list_niet_ngr.values[0].provincie)
+            d3.select("#graph").selectAll('svg').select('#' + dataset_list_niet_ngr.values[0].provincie)
                 .transition()
                 .duration(100)
                 .style("fill", "#5d9840")
         })
         .addTo(controller);
     
-        var scene_2_3 = new ScrollMagic.Scene({
-            triggerElement: "#content_2_3",
-            triggerHook: "onCenter",
-            duration: 500
-        })
-        .on("progress", function (event) {
-            // console.log("Scene progress changed to " + event.progress);
-        })
-        .on("enter ", function (event) {
-            d3.selectAll('svg').select('#' + dataset_list[2].provincie)
-                .transition()
-                .duration(100)
-                .style("fill", "#5d9840")
-        })
+        // var scene_2_3 = new ScrollMagic.Scene({
+        //     triggerElement: "#content_2_3",
+        //     triggerHook: "onCenter",
+        //     duration: 500
+        // })
+        // .on("progress", function (event) {
+        //     // console.log("Scene progress changed to " + event.progress);
+        // })
+        // .on("enter ", function (event) {
+        //     d3.selectAll('svg').select('#' + dataset_list[2].provincie)
+        //         .transition()
+        //         .duration(100)
+        //         .style("fill", "#5d9840")
+        // })
         // .on("leave", function () {
         //     d3.selectAll('svg')
         //         .transition()
         //         .duration(100)
         //         .style("fill", "#ffffff")
         // })
-        .addTo(controller);
+        // .addTo(controller);
 
     var scene_3 =  new ScrollMagic.Scene({
         triggerElement: "#content_3",
