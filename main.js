@@ -55,6 +55,25 @@ function isloaded() {
             // Set retrieval data
             d3.select('.tooltiptext').selectAll('span').remove();
             d3.select('.tooltiptext').select('#replace').append('span').text("Gegevens opgehaald op: " + new Date() )
+            
+            // Download Dataset list
+            let csvContent = toCSV(dataset_list);
+            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(csvContent);
+            var dlAnchorElem = document.getElementById('download');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "datasets_list.csv");
+
+            function toCSV(json){
+                var csv = "";
+                var keys = (json[0] && Object.keys(json[0])) || [];
+                var data = Object.values(json);
+                csv += keys.join(';') + "\r\n";  
+                for (var item in json) { 
+                    csv += Object.values(json[item]).join(";") + "\r\n"; 
+                } 
+                return csv;
+            }
+           
             // Do data crunch en visualization
             setViz();
             initScrollMagic();
@@ -139,7 +158,6 @@ function jsonp(url, callback) {
         document.body.removeChild(script);
         callback(data);
     };
-
     var script = document.createElement('script');
     script.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + callbackName;
     document.body.appendChild(script);
@@ -149,7 +167,6 @@ function jsonp(url, callback) {
 // URL request per provincie
 function doRequest(provincie) {
     var url = 'https://data.overheid.nl/data/api/3/action/package_search?q=maintainer:' + provincie + '&rows=1000';
-
     jsonp(url, function (data) {
         var myArr = data;
         // JSON.parse(data);
@@ -660,9 +677,7 @@ function initScrollMagic() {
 
     var scene_3 =  new ScrollMagic.Scene({
         triggerElement: "#content_3",
-        triggerHook: "onEnter",
-        offset: 400,
-        duration: 1000 
+        triggerHook: "onEnter" 
     })
         .on("start", function () {
             // align provinces along line
@@ -690,9 +705,6 @@ function spreadProvincies(){
                         x = centroid[0],
                         y = centroid[1];
                     return "translate(" + ((-x + (part * i)) + part / 2) + "," + (-y + height / 2) + ")"; 
-                // Text 
-            // element.append('text')
-
                 })
                 .on("end", function(){
                     graphPerProvince.selectAll('text')
@@ -772,3 +784,4 @@ function reverseSpreadProvincies(){
                 .style("fill", "#fff");
         })
 }
+
