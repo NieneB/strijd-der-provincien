@@ -264,7 +264,7 @@ function setViz(){
         .sort(function (a, b) {
             return new Date(b.metadata_created_date) - new Date(a.metadata_created_date);
         });
-    console.log(datasetsPerProvince);
+    // console.log(datasetsPerProvince);
         
     graphPerProvince = d3.select('#content_3')
         .append('svg')
@@ -282,7 +282,7 @@ function setViz(){
         .text(function(d){
             return d.values.length;
         })
-        .style('color', '#0e232e')
+        .style('fill', '#0e232e')
         .each(function(d){
             var prov = d3.selectAll('svg').select('#' + d.key + '.provincie');
             var trans = prov.attr("transform");
@@ -373,7 +373,7 @@ function setViz(){
         .rollup(function (leaves) { return leaves.length })
         .entries(dataset_list)
         .sort(function (a, b) { return d3.descending(a.values.length, b.values.length); });
-    console.log(datasetsPerProvincieThema)
+    // console.log(datasetsPerProvincieThema)
 
     var datasetsPerThema = d3.nest()
         .key(function (d) { return d.theme;})
@@ -521,7 +521,7 @@ function setViz(){
         .sort(function (a, b) {
             return new Date(b.metadata_created_date) - new Date(a.metadata_created_date);
         });
-    // console.log(datasetsPerTime);
+    console.log(datasetsPerTime);
     // ....
     // ....
     // ....
@@ -684,7 +684,8 @@ function initScrollMagic() {
 
     var scene_3 =  new ScrollMagic.Scene({
         triggerElement: "#content_3",
-        triggerHook: "onEnter" 
+        triggerHook: "onEnter" ,
+        offset: 400
     })
         .on("start", function () {
             // align provinces along line

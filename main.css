@@ -19,6 +19,7 @@ html, body {
   overflow-y: hidden;
   overflow-x: hidden;
   webkit-overflow-scrolling: auto;
+  color: #0e232e;
 }
 
 #titel{
@@ -28,6 +29,7 @@ html, body {
 
 p{
     font-family: monospace;
+    font-size: 1.2em;
 }
 
 a{
@@ -42,6 +44,8 @@ h1{
 h4{
     font-family: monospace;
     line-height: 1.5;
+    font-size: 1.6em;
+
 }
 
 text{
@@ -54,6 +58,7 @@ text{
 
 .dark{
     background-color: #0e232e;
+    color: #ffffff;
 }
 
 
