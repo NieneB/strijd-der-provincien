@@ -9,18 +9,18 @@ var ScrollMagic = require('scrollmagic');
 // ==================================================// 
 var provincies = ["Noord-Brabant", "Zuid-Holland", "Provincie_Groningen", "Provincie_Utrecht", "Gelderland", "Noord-Holland", "Flevoland", "Drenthe", "Fryslan", "Limburg", "Zeeland", "Overijssel"];
 // var provincies = ["Noord-Brabant", "Zuid-Holland"];
-var loader = d3.selectAll('#loader');
-var dataset_list = [];
-dataset_list_niet_ngr = [];
-var count = 0;
-var width = document.body.clientWidth - (document.body.clientWidth*0.1) ;
-var part = width / 12;
-var height = 150;
-var provinciesSVG;
-var graphPerProvince;
-var graph;
-var themaGraph;
-var path;
+var loader = d3.selectAll('#loader'),
+    dataset_list = [],
+    dataset_list_niet_ngr = [],
+    count = 0,
+    width = document.body.clientWidth - (document.body.clientWidth*0.1) ,
+    part = width / 12,
+    height = 150,
+    provinciesSVG,
+    graphPerProvince,
+    graph,
+    themaGraph,
+    path;
 // ==================================================//
 // start website by requesting data
 perProvince(provincies);
@@ -43,7 +43,7 @@ function perProvince(provincies) {
 function isloaded() {
     var id = setInterval(frame, 40);
     function frame() {
-        if (provincies.length == count) {
+        if (count == provincies.length) {
             // Enable scrolling
             d3.select('body').style("overflow-y", "scroll");
             // Show scroll trigger
@@ -67,7 +67,7 @@ function isloaded() {
 // Draw province shapes from geojson
 function provincieMap(){
     d3.json('https://raw.githubusercontent.com/NieneB/strijd-der-provincien/master/data/provincies2.json', function(error, data){
-        if (error) throw error;
+        if (error) throw error ;
         // DATA
         var features = data.features;
         // PROJECTION
@@ -135,11 +135,17 @@ function doRequest(provincie) {
     var xhr = new XMLHttpRequest();
     var url = 'https://data.overheid.nl/data/api/3/action/package_search?q=maintainer:' + provincie + '&rows=1000';
     xhr.onreadystatechange = function () {
+        // console.log(this)
         if (this.readyState == 4 && this.status == 200) {
             var myArr = JSON.parse(this.responseText);
             ProvinceDataset(myArr, provincie);
             count ++;
-        }
+        } 
+        // if (this.readyState == 1 && this.status == 0){
+        //     console.log("request failed")
+        //     count ++;
+        // }
+       
     };
     xhr.open("GET", url, true);
     xhr.send();
@@ -249,7 +255,7 @@ function setViz(){
     var max =  Math.max(...dagen.map(function (key) { return key.dagen; }));
     var scaleHeight = d3.scaleLinear()
         .domain([0,max])
-        .range([20,650])
+        .range([20,650]);
 
     graph = d3.select('#content_4')
         .append('svg')
@@ -316,7 +322,7 @@ function setViz(){
         .key(function (d) { return d.theme2; })
         .rollup(function (leaves) { return leaves.length })
         .entries(dataset_list)
-        .sort(function (a, b) { return d3.descending(a.value, b.value); });
+        .sort(function (a, b) { return d3.descending(a.values.length, b.values.length); });
     console.log(datasetsPerProvincieThema)
 
     var datasetsPerThema = d3.nest()
@@ -375,6 +381,10 @@ function setViz(){
                 .attr("transform", "translate(" + sp.x + ", 50)")
         });
 
+    var scaleCircle = d3.scaleLinear()
+        .domain([0, 550])
+        .range([5, 150])
+
     themaGraphGroups
         .selectAll('circle')
         .data(function (d) { return d.values.slice(0, 3).sort(function (a, b) { return d3.descending(a.value, b.value); })})
@@ -384,7 +394,7 @@ function setViz(){
             return d.key;
         })
         .attr("r", function(d){
-            return d.value
+            return scaleCircle(d.value)
         })
         .style("opacity", 0.85)
         .style("fill", function (d) {
@@ -655,7 +665,7 @@ function spreadProvincies(){
                         y = centroid[1];
                     return "translate(" + ((-x + (part * i)) + part / 2) + "," + (-y + height / 2) + ")"; 
                 // Text 
-            element.append('text')
+            // element.append('text')
 
                 })
                 .on("end", function(){
