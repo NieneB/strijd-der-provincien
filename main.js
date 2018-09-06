@@ -130,25 +130,51 @@ function provincieMap(){
     });
 };
 
+
+// JSONP request per provincie
+function jsonp(url, callback) {
+    var callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+    window[callbackName] = function (data) {
+        delete window[callbackName];
+        document.body.removeChild(script);
+        callback(data);
+    };
+
+    var script = document.createElement('script');
+    script.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + callbackName;
+    document.body.appendChild(script);
+}
+
+
 // URL request per provincie
 function doRequest(provincie) {
-    var xhr = new XMLHttpRequest();
     var url = 'https://data.overheid.nl/data/api/3/action/package_search?q=maintainer:' + provincie + '&rows=1000';
-    xhr.onreadystatechange = function () {
-        // console.log(this)
-        if (this.readyState == 4 && this.status == 200) {
-            var myArr = JSON.parse(this.responseText);
-            ProvinceDataset(myArr, provincie);
-            count ++;
-        } 
-        // if (this.readyState == 1 && this.status == 0){
-        //     console.log("request failed")
-        //     count ++;
-        // }
+
+    jsonp(url, function (data) {
+        var myArr = data;
+        // JSON.parse(data);
+        ProvinceDataset(myArr, provincie);
+        // alert(data);
+        count++;
+
+    });
+
+    // var xhr = new XMLHttpRequest();
+    // xhr.onreadystatechange = function () {
+    //     // console.log(this)
+    //     if (this.readyState == 4 && this.status == 200) {
+    //         var myArr = JSON.parse(this.responseText);
+    //         ProvinceDataset(myArr, provincie);
+    //         count ++;
+    //     } 
+    //     // if (this.readyState == 1 && this.status == 0){
+    //     //     console.log("request failed")
+    //     //     count ++;
+    //     // }
        
-    };
-    xhr.open("GET", url, true);
-    xhr.send();
+    // };
+    // xhr.open("GET", url, true);
+    // xhr.send();
 };
 
 // Make ONE dataset list from all provinces
